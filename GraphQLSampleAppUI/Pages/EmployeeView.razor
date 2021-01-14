@@ -1,0 +1,61 @@
+﻿@page "/EmployeeView"
+
+
+@using GraphQLSampleAppUI.DataAccess;
+@using GraphQLSampleAppUI.DataAccess.Model;
+
+@inject NavigationManager NavigationManager
+
+<h1>All Employee</h1>
+
+<a href="/CreateEmployee">Create an Employee</a>
+
+@if (AllEmployees.Count == 0)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>                
+                <th>Email</th>                
+                <th>Age</th>                
+                <th>Department Name</th>                
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var emp in AllEmployees)
+            {
+                <tr>
+                    <td><a href="/ViewEmployee/@emp.EmployeeId">@emp.Name</a> </td>                   
+                    <td>@emp.Email</td>                   
+                    <td>@emp.Age</td>                   
+                    <td>@emp.Department.Name</td>                   
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Employee> AllEmployees = new List<Employee>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string completeQuery = "query{allEmployeeWithDepartment{name,age,departmentId,email,employeeId,department{name,departmentId}}}";
+            string graphQLQueryType = "allEmployeeWithDepartment";
+
+
+            var result = await Query.ExceuteQueryReturnListAsyn<Employee>(graphQLQueryType, completeQuery);
+            AllEmployees = result;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+}

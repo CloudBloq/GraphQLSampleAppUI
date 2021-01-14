@@ -1,0 +1,67 @@
+﻿@page "/CreateEmployee"
+
+
+@using GraphQLSampleAppUI.DataAccess;
+@using GraphQLSampleAppUI.DataAccess.Model;
+
+@inject NavigationManager NavigationManager
+
+<h1>Create An Employee</h1>
+
+<div class="row">
+    <EditForm Model="@createEmployee" OnValidSubmit="@CreateButtonClick">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            Name: <InputText id="name" @bind-Value="createEmployee.Name" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            Email: <InputText id="email" @bind-Value="createEmployee.Email" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            Age: <InputNumber class="form-control" @bind-Value="createEmployee.Age" ParsingErrorMessage="Must be an integer value between 20 and 50" />
+        </div>
+
+        <div class="form-group">
+            Department Name: <InputText class="form-control" id="departmentName" @bind-Value="createEmployee.DepartmentName" />
+        </div>
+
+        <button type="submit" class="btn btn-success">Create</button>
+    </EditForm>
+</div>
+
+<br />
+<br />
+<a href="/EmployeeView">Back to List</a>
+
+
+@code {
+
+    private CreateEmployeeReturnModel createEmployeeReturnModel = new CreateEmployeeReturnModel();
+    private CreateEmployeeModel createEmployee = new CreateEmployeeModel();
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    private async Task CreateButtonClick()
+    {
+        try
+        {
+            string completeQuery = $"mutation{{createEmployeeWithDepartment(name:\"{createEmployee.Name}\",age:{createEmployee.Age},email:\"{createEmployee.Email}\",departmentName:\"{createEmployee.DepartmentName}\"){{name,employeeId,departmentId}}}}";
+            string graphQLQueryType = "createEmployeeWithDepartment";
+
+            var result = await Mutation.ExceuteMutationAsyn<CreateEmployeeReturnModel>(graphQLQueryType, completeQuery);
+            createEmployeeReturnModel = result;
+            NavigationManager.NavigateTo($"ViewEmployee/{createEmployeeReturnModel.EmployeeId}");
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
+}
+
+

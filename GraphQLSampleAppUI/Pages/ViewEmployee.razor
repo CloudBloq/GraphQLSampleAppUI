@@ -1,0 +1,63 @@
+﻿@page "/ViewEmployee/{Id:int}"
+
+
+@using GraphQLSampleAppUI.DataAccess;
+@using GraphQLSampleAppUI.DataAccess.Model;
+
+@inject NavigationManager NavigationManager
+
+
+@if (employee.Name == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h2>@employee.Name Details</h2>
+
+    <div >
+        <div>
+            Age:<span  style="font-size:large">@employee.Age</span>
+            <br />
+        </div>
+        <br />
+
+        <div>
+            Email: <span style="font-size:large">@employee.Email</span>
+            <br />
+        </div>
+        <br />
+
+        <div>
+            Department Name: <span style="font-size:large">@employee.Department.Name</span>
+            <br />
+        </div>            
+    </div>
+}
+
+<br />
+<br />
+<a href="/EmployeeView">Back to List</a>
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private Employee employee = new Employee();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string completeQuery = $"query{{employeeById(id:{Id}){{age,department{{departmentId,name}}departmentId,email,employeeId,name}}}}";
+        string graphQLQueryType = "employeeById";
+
+        var result = await Query.ExceuteQueryAsyn<Employee>(graphQLQueryType, completeQuery);
+
+        if(result == null)
+        {
+            NavigationManager.NavigateTo($"EmployeeView");
+        }
+        employee = result;
+    }
+}
+
